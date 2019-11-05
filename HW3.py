@@ -1,5 +1,6 @@
 import numpy as np
 
+# Neural Networks
 # 1. 3-Layer Neural Networks: Calculate outputs of each layer 
 # n data points with k inputs; qn units in nth layer
 
@@ -30,3 +31,15 @@ def feedforward(x, layer1W, layer2W, layer3W):
   return outDict
   
   
+# Principal Component Analysis(PCA)
+
+# Given function commonDirection
+import numpy.linalg as LN
+
+def commonDirection(allData):
+  covMat = np.matmul(allData.T, allData)
+  w, v = LN.eig(covMat)
+  maxInd = np.argwhere(w == max(w))
+  component = v[:, maxInd[0]].real
+  return component
+
