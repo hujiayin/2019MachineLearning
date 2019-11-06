@@ -43,3 +43,57 @@ def commonDirection(allData):
   component = v[:, maxInd[0]].real
   return component
 
+
+# Loading data
+'''
+import csv
+import numpy
+reader = csv.reader(open('mnist_train.csv', 'rb'), delimiter=',')
+x=list(reader)
+digits = numpy.array(x).astype('float')
+'''
+
+import pandas as pd
+df = pd.read_csv('https://storm.cis.fordham.edu/leeds/cisc5800/mnist_train.csv', header=None)
+allData = np.array(df)[:, 1:].astype('float')
+
+
+# 2. Calculate a single z for one datapoints given one component (i.e. the datapoint's projection on the given component)
+
+def dataProjection(dataVector, component):
+  z = np.dot(component, dataVector)
+  return z
+
+
+# 3. Update one datapoint by removing the principal component
+
+def componentRemoval(xOld, component, z):
+  xNew = xOld - z * component
+  return xNew
+
+# 4. Find n principal components
+
+def findComponents(allData, n):
+
+  uMatrix = np.ones((n, allData.shape[1]))
+  
+  # set data to be zero-average for each feature
+  for i in range(allData.shape[1]):
+    allData[:, i] = allData[:, i] - np.mean(allData[:, i])
+
+  dataPoints = allData
+  for i in range(n):
+    # find most common direction of variance  
+    u = commonDirection(dataPoints).reshape(dataPoints.shape[1])
+    uMatrix[i, :] = u / np.linalg.norm(u)
+    zVector = np.array([dataProjection(dataPoints[m, :], uMatrix[i, :]) for m in range(dataPoints.shape[0])])
+    for m in range(dataPoints.shape[0]):
+      dataPoints[m, :] = componentRemoval(dataPoints[m, :], uMatrix[i, :], zVector[m])
+
+  return uMatrix
+
+# 5. visualize the first 3 components
+comp3 = findComponents(allData, 3)
+for i in range(comp3.shape[0]):
+  plt.imshow(comp3[i, :].reshape((28, 28)))
+  plt.show()
